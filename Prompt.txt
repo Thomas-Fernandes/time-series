@@ -1,0 +1,10 @@
+Projet de Séries temporelles, M1 IES-D3S
+Exercice 1
+
+Soit (e_t)_{t \in \mathbb{Z}} un bruit blanc faible de variance \sigma^2 (gaussien de variance 1 dans les simulations) A et B désigne respectivement deux variables aléatoires indépendantes de même loi (par exemple normale pour les simulations) indépendantes de (e_t)_{t \in \mathbb{Z}}, de variance finie:
+
+Les processus (X_t)_{t \in \mathbb{N}} suivants admettent-ils une solution stationnaire au second ordre? Pour cela on calculera l'espérance et la fonction  d'autocovariance si possible. Les mettre sous forme canonique quand c'est possible. Si le processus n'est pas stationnaire, proposer une méthode pour le rendre stationnaire.
+
+a : X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}
+
+Représenter trois trajectoires de taille n = 200 de chaque processus sur un même graphique (si possible avec des couleurs différentes).

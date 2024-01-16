@@ -1,0 +1,47 @@
+---
+title: "Script"
+output: pdf_document
+date: "2024-01-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+```
+
+
+# Exercice 1
+
+## a) $X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}$
+
+$\mathbb{E}[\epsilon_t] = 0$ puisqu'il s'agit d'un bruit blanc et $\mathbb{E}[\sin(t)]$ varie en fonction de $t$. Par conséquent, l'espérance de \(X_t\) n'est pas constante, car elle dépend de \(t\) à travers le terme \(\sin(t)\). Ainsi nous n'avons pas besoin de la fonction d'autocovariance puisqu'on sait que le processus n'est pas stationnaire.\newline
+
+```{r}
+set.seed(123)
+n <- 200
+
+trajectoire_a <- function(n) {
+  epsilon <- rnorm(n)
+  X <- rep(0, n)
+  for (t in 2:n) {
+    X[t] <- sin(t) + epsilon[t] - 0.2 * epsilon[t - 1]
+  }
+  return(X)
+}
+
+X1 <- trajectoire_a(n)
+X2 <- trajectoire_a(n)
+X3 <- trajectoire_a(n)
+
+plot(X1, type = "l", ylim = range(c(X1, X2, X3)), ylab = "X_t", xlab = "t")
+lines(X2)
+lines(X3)
+```
+
+## b) $\, X_t = \varepsilon_t - \varepsilon_{t-1}$
+
+\[
+E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon_{t-1}) = 0 - 0 = 0
+\]
