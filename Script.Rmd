@@ -45,3 +45,38 @@ lines(X3)
 \[
 E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon_{t-1}) = 0 - 0 = 0
 \]
+
+
+# Exercice 2
+
+## a) Représentation graphique de la série p1
+
+```{r}
+source("prix.R")
+
+plot(p1, type = "l", main = "Série Temporelle des Prix", xlab = "Temps", ylab = "Prix")
+```
+D'après le graphique, on peut émettre l'hypothèse que la série est stationnaire en moyenne et en variance puisque la moyenne est constante et la variance homoscédastique. De plus, la covariance entre 2 points semble constante, l'écart entre chaque fluctuation est le même et laisse penser à une saisonalité.
+
+
+## b) Fonctions d'autocorrélation acf et pacf
+
+```{r}
+acf(p1)
+pacf(p1)
+spectrum(p1)
+p1_decomp <- decompose(p1)
+plot(p1_decomp)
+```
+
+## c) $X_t = m + A \sin\left(\frac{2\pi t}{T}\right) + B \cos\left(\frac{2\pi t}{T}\right) + Y_t$
+
+   - \( X_t \) représente la valeur de la série temporelle au temps \( t \).
+   - \( m \) est la moyenne de la série.
+   - \( A \) et \( B \) sont les amplitudes des composantes sinusoïdales et cosinusoïdales, respectivement.
+   - \( T \) est la période de la composante saisonnière. Pour des données hebdomadaires sur plusieurs années, \( T \) pourrait être 52, représentant le nombre de semaines par an.
+   - \( Y_t \) est le terme d'erreur ou la composante non-périodique.
+
+On choisit donc un T de 52.
+
+
