@@ -7,6 +7,9 @@ Les processus (X_t)_{t \in \mathbb{N}} suivants admettent-ils une solution stati
 
 a : X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}
 
+X_t = \varepsilon_t - \varepsilon_{t-1}
+
+
 Représenter trois trajectoires de taille n = 200 de chaque processus sur un même graphique (si possible avec des couleurs différentes).
 
 
