@@ -40,11 +40,144 @@ lines(X2)
 lines(X3)
 ```
 
+
+## a) $X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}$
+
+$\mathbb{E}[\epsilon_t] = 0$ puisqu'il s'agit d'un bruit blanc et $\mathbb{E}[\sin(t)]$ varie en fonction de $t$. Par conséquent, l'espérance de \(X_t\) n'est pas constante, car elle dépend de \(t\) à travers le terme \(\sin(t)\).
+
+La fonction d'autocovariance est définie par $\gamma_X(h) = \text{Cov}(X_t, X_{t+h}), \quad h = 0, \pm 1, \pm 2, \ldots$. Pour \(X_t\), nous avons :
+
+\[ \gamma_X(h) = \text{Cov}(\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}, \sin(t+h) + \varepsilon_{t+h} - 0.2 \times \varepsilon_{t+h-1}) \]
+
+Puisque \( \varepsilon_t \) est un bruit blanc de variance \(\sigma^2\) et est indépendant des termes précédents et suivants, la seule autocovariance non nulle se produit lorsque \( h = 0 \) ou \( h = \pm1 \). Cela donne :
+
+\[ \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) \]
+\[ \gamma_X(1) = \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t+1} - 0.2 \times \varepsilon_t) \]
+\[ \gamma_X(-1) = \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2}) \]
+
+Calculons ces valeurs :
+
+- Pour \( h = 0 \), \( \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) = \sigma^2 + 0.04\sigma^2 = 1.04\sigma^2 \) (car \( \sigma^2 = 1 \) dans les simulations).
+- Pour \( h = 1 \) ou \( h = -1 \), \( \gamma_X(1) = \gamma_X(-1) = -0.2\sigma^2 \).
+
+La dépendance de \( \gamma_X(h) \) sur \( t \) (due à la présence de \( \sin(t) \) et \( \sin(t+h) \)) indique que le processus n'est pas stationnaire au second ordre.
+
+Pour le rendre stationnaire, nous allons différencier le processus à l'ordre 1.
+
+$\Delta X_t = X_t - X_{t-1}$
+$\Delta X_t = (\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}) - (\sin(t-1) + \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2})$
+$\Delta X_t = (\sin(t) - \sin(t-1)) + (\varepsilon_t - \varepsilon_{t-1}) - 0.2 \times (\varepsilon_{t-1} - \varepsilon_{t-2})$
+
+- L’espérance :
+
+L'espérance du processus différencié, \( E[\Delta X_t] \), est la différence entre les espérances des termes à \( t \) et \( t-1 \). Étant donné que l'espérance de \( \varepsilon_t \) est 0, l'espérance de \( \Delta X_t \) devient :
+
+     \[ E[\Delta X_t] = E[\sin(t) - \sin(t-1)] \]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## b) $\, X_t = \varepsilon_t - \varepsilon_{t-1}$
 
 \[
 E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon_{t-1}) = 0 - 0 = 0
 \]
+
+La fonction d'autocovariance est définie comme : $\gamma_X(h) = \text{Cov}(X_t, X_{t+h}), \quad h = 0, \pm 1, \pm 2, \ldots$.
+
+- **Pour \( h = 0 \) :**
+
+\begin{align*}
+\gamma_X(0) &= \text{Cov}(X_t, X_{t + 0}) \\
+&= \text{Var}(X_t) \\
+&= \text{Var}(\varepsilon_t) + \text{Var}(\varepsilon_{t-1}) \\
+&= \sigma^2 + \sigma^2 \\
+&= 2\sigma^2
+\end{align*}
+
+
+- **Pour \( h = 1 \) :**
+
+
+\begin{align*}
+\gamma_X(1) &= \text{Cov}(X_t, X_{t+1}) \\
+&= \text{Cov}(\varepsilon_t - \varepsilon_{t-1}, \varepsilon_{t+1} - \varepsilon_t) \\
+&= \text{Cov}(\varepsilon_t, \varepsilon_{t+1}) - \text{Cov}(\varepsilon_t, \varepsilon_t) - \text{Cov}(\varepsilon_{t-1}, \varepsilon_{t+1}) + \text{Cov}(\varepsilon_{t-1}, \varepsilon_t)
+\end{align*}
+
+D'après la définition du bruit blanc, $\text{Cov}(\varepsilon_t, \varepsilon_s) = 0, \quad t \neq s$, alors :
+
+
+\begin{align*}
+\gamma_X(1) &= 0 - \text{Var}(\varepsilon_t) - 0 + 0 \\
+&= -\text{Var}(\varepsilon_t) \\
+&= -\sigma^2
+\end{align*}
+
+- **Pour \( h > 1 \) ou \( h < -1 \) :**
+Les termes sont indépendants, donc \( \gamma_X(h) = 0 \).
+
+Le processus \( X_t = \varepsilon_t - \varepsilon_{t-1} \) est stationnaire au second ordre car son espérance est constante et sa fonction d'autocovariance ne dépend que de \( h \) et non de \( t \).
+
+
+Sous sa forme canonique $X_t = \varepsilon_t - \varepsilon_{t-1}$, le processus s'écrit comme : $X_t = (1 - B)\varepsilon_t$ correspondant à un ARMA(0,1) ou un MA(1).
+
+```{r}
+set.seed(123)
+b1 <- arima.sim(model = list(ma = -1), n = 200, sd = 1)
+b2 <- arima.sim(model = list(ma = -1), n = 200, sd = 1)
+b3 <- arima.sim(model = list(ma = -1), n = 200, sd = 1)
+
+plot(b1, type="l", col="black", main="Trajectoires MA(1)", xlab = "Temps", ylab = "Valeurs")
+lines(b2, col="limegreen")
+lines(b3, col="lightblue")
+
+```
+
+
+
 
 
 # Exercice 2
