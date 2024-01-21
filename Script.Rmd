@@ -9,6 +9,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, include = FALSE}
+library(tseries)
+library(forecast)
+library(kableExtra)
+library(knitr)
 ```
 
 
@@ -248,25 +252,6 @@ $r=4$
 
 Notre processus est donc un ARMA(0.25, 4)
 
-```{r}
-set.seed(123) # Pour assurer la reproductibilité
-
-# Paramètres du modèle
-ar_param <- 4     # Paramètre AR
-ma_param <- -0.25 # Paramètre MA
-
-# Simulation du processus ARMA(1,1)
-b1 <- arima.sim(model = list(ar = ar_param, ma = ma_param), n = 200)
-b2 <- arima.sim(model = list(ar = ar_param, ma = ma_param), n = 200)
-b3 <- arima.sim(model = list(ar = ar_param, ma = ma_param), n = 200)
-
-# Tracer les graphiques
-plot(b1, type="l", col="black", main="Trajectoires ARMA(1,1)", xlab = "Temps", ylab = "Valeurs")
-lines(b2, col="limegreen")
-lines(b3, col="lightblue")
-
-```
-
 
 # Exercice 2
 
@@ -290,6 +275,8 @@ p1_decomp <- decompose(p1)
 plot(p1_decomp)
 ```
 
+On remarque que la saisonalité est très marquée et régulière, tandis que la tendance est plus compliquée à discerner, même s'il semble y avoir une tendance à la baisse.
+
 ## c) $X_t = m + A \sin\left(\frac{2\pi t}{T}\right) + B \cos\left(\frac{2\pi t}{T}\right) + Y_t$
 
    - \( X_t \) représente la valeur de la série temporelle au temps \( t \).
@@ -300,4 +287,130 @@ plot(p1_decomp)
 
 On choisit donc un T de 52.
 
+```{r}
+T <- 52
+t <- 1:length(p1)
+
+sin_term <- sin(2 * pi * t / T)
+cos_term <- cos(2 * pi * t / T)
+
+reg_model <- lm(p1 ~ sin_term + cos_term)
+
+m <- coef(reg_model)[1]
+A <- coef(reg_model)[2]
+B <- coef(reg_model)[3]
+
+#centrer les résidus
+Zt <- reg_model$residuals - mean(reg_model$residuals)
+
+#Test de Dickey-fuller (test de stationnarité)
+adf_test <- adf.test(Zt)
+
+summary(reg_model)
+adf_test
+```
+
+On remarque que tous les coefficients sont significatifs. La composante saisonnière sinusoïdale est donc une caractéristique importante de la série p1. L'écart type résiduel est faible (0.5328) et le coefficient de détermination ajusté est plutôt élevé (0.862), le modèle semble donc expliqué une grande partie de la variance des données.
+
+Le p.value du test de Dickey-Fuller étant inférieur au seuil de 5%, on rejette l'hypothèse nulle d'une racine unitaire. Les résidus $Z_t$ du modèle sont stationnaires.
+
+## d) Choix du modèle
+
+```{r}
+acf(Zt)
+pacf(Zt)
+```
+
+$Z_t$ n'est pas un bruit blanc puisqu'il y a des autocorrelations significatives sur l'acf comme sur le pacf, suggérant que notre modèle contiendra une partie AR et une partie MA. Sur la partie AR, le dernier retard est atteint en lag = 4 et pour la partie MA, le dernier retard est atteint en lag = 6. Nous allons ainsi tester par le moyen d'une boucle tous les modèles en faisant varier la partie AR de 0 à 4 et la partie MA de 0 à 6. Pour chaque modèle, on vérifiera les t.values associées à chaque coefficients $coef/s.e.$ en considérant que si sa valeur est inférieure à 1.96, considère la t.value comme non significative.
+
+```{r}
+library(forecast)
+
+# Generate all possible combinations of AR and MA orders
+orders <- expand.grid(ar = 0:4, ma = 0:6)[-1, ] # exclude the case where both ar and ma are zero
+
+# Fit an ARIMA model for each combination
+models <- list()
+for (i in seq(nrow(orders))) {
+  models[[i]] <- Arima(Zt, order = c(orders[i, "ar"], 0, orders[i, "ma"]))
+}
+
+# Compute the AIC and count non-significant t values for each model
+results <- data.frame(AR = rep(NA, nrow(orders)),
+                      MA = rep(NA, nrow(orders)),
+                      AIC = rep(NA, nrow(orders)),
+                      stringsAsFactors = FALSE)
+for (i in seq(nrow(orders))) {
+  model <- models[[i]]
+  coefs <- model$coef
+  se_coefs <- sqrt(diag(vcov(model)))
+  t.values <- abs(coefs / se_coefs)
+  compteur_t.values <- sum(t.values < 1.96) - 1
+
+  results[i, "AR"] <- orders[i, "ar"]
+  results[i, "MA"] <- orders[i, "ma"]
+  results[i, "AIC"] <- AIC(model)
+  results[i, "t.value non significatives"] <- compteur_t.values
+}
+
+kable(results, booktabs = TRUE) %>%
+  kable_styling(latex_options = c("hold_position"))
+```
+
+Il y a deux modèles qui se distinguent clairement des autres : ARMA(1,3) et l'ARMA(4,1). Ils ont toutes leurs t.values significatives et ont un AIC plus faible que les autres. On gardera l'ARMA(1,3) car son AIC est un petit peu plus faible que pour l'ARMA(4,1), bien qu'on puisse considérer les deux modèles comme équivalents.
+
+## e) Prévision pour le mois de janvier
+
+Pour la fonction forecast, on choisit un h = 4, correspondant aux 4 premières semaines de janvier.
+
+```{r}
+arma_xt <- Arima(Zt, order=c(1,0,3))
+Zt_forecast <- forecast(arma_xt, h=4)
+```
+
+On doit ensuite reconstruire les prédictions pour $X_t$ en ajoutant la trend et la saisonalité.
+
+```{r}
+t_future <- length(p1) + 1:length(Zt_forecast$mean)
+sin_term_future <- sin(2 * pi * t_future / 52)
+cos_term_future <- cos(2 * pi * t_future / 52)
+Xt_future <- m + A * sin_term_future + B * cos_term_future + Zt_forecast$mean
+
+# Afficher les prédictions pour Xt
+Xt_future
+
+```
+
+## f) SARIMA
+
+```{r}
+sarima_Xt <- auto.arima(p1)
+summary(sarima_Xt)
+```
+
+La fonction `auto.arima()` choisi le modèle $SARIMA_{52}[(0,0,3)(2,1,0)]$. Ainsi, il choisi 3 composantes MA pour la partie non saisonnière et 2 composantes AR ainsi qu'une différenciation pour la partie saisonnière.
+
+```{r}
+january_forecast <- forecast(sarima_Xt, h=4)
+january_forecast
+```
+
+## g) Application de l'opérateur de différenciation $(1-B^52)$
+
+```{r}
+p1_diff <- diff(p1, lag = 52)
+arma_model_diff <- auto.arima(p1_diff, seasonal = FALSE)
+summary(arma_model_diff)
+january_forecast_diff <- forecast(arma_model_diff, h=4)
+kbl(january_forecast_diff, booktabs = TRUE) %>%
+  kable_styling(latex_options = c("hold_position"))
+```
+
+## h) Modèle le plus pertinent
+
+## i) 
+
+$(1 - B^2)(1 - 2B + B^2)(1 - 2B)X_t = \varepsilon_t - \varepsilon_{t-1}$\\
+$(1 - B^2)(1 - 2B + B^2)(1 - 2B) = (1 - B)(1 + B)(1 - B)(1 - B) = (1 - B)^3(1 + B)$\\
+$(1 - B)^3(1 + B)X_t = \varepsilon_t - \varepsilon_{t-1}$\\
 

@@ -17,7 +17,20 @@ Représenter trois trajectoires de taille n = 200 de chaque processus sur un mê
 
 Chaque groupe doit étudier une série de prix choisie parmi p1,p2,p3,p4,...,p9. Ces prix (dit unitaires car moyennés sur une zone géographique) sont dans le fichier prix.R qu'il faut sourcer sous R. Il s'agit de données de prix hebdomadaires de produits à la consommation (les données sont anonymisées car payantes sinon), observées sur 10 ans, avec 52 semaines par années (une correction pour les années bisextiles avec 53 semaines à été appliquées pour se ramener à 52) soit au total 520 données.
 
+a) Donner une représentation graphique du processus: Vous parait-il stationnaire? Que voit-on juste en regardant le graphique?
+
 b) Donner les fonctions d'autocorrélation acf et pacf du processus. Donner une estimateur de la densité spectrale du processus. Proposer une décomposition du signal en trend , saisonalité avec la fonction decompose de R. Qu'en déduisez vous?
 
 c) On suppose d'abord que le processus a une composante périodique déterministe de la forme X_t = m + A \sin\left(\frac{2\pi t}{T}\right) + B \cos\left(\frac{2\pi t}{T}\right) + Y_t 
 En choisissant bien \( T \) (compte-tenu des observations et du problème considéré), déterminer par une régression linéaire la valeur de \( m \), \( A \) et \( B \). On se ramène désormais à l'étude des résidus centrés estimés \( Z_t = \hat{Y}_t \). Tester la stationnarité de \( Z_t \).
+
+f) On cherche plutôt à estimer un modèle SARIMA. Que vous donne comme choix la procédure automatique auto.arima du package forecast? En déduire les prédictions du mois de janvier avec ce modèle (on pourra utiliser la fonction forecast).
+
+g) Appliquer un opérateur (1-B^52) aux données Xt et proposer un modèle adéquat de type ARMA. En déduire les prédictions du mois de janvier avec ce modèle et les intervalles de confiance associées.
+
+h) Quel modèle vous semble le plus pertinent : c) suivi de e) ou f) ou g)? Il y a t'il une grosse différence en terme de prédictions?
+
+j)
+
+
+https://chat.openai.com/g/g-0S5FXLyFN-wolfram/c/f1f4d172-8584-4ca9-a773-3f57215ac31c
