@@ -16,94 +16,45 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## a) $X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}$
 
-$\mathbb{E}[\epsilon_t] = 0$ puisqu'il s'agit d'un bruit blanc et $\mathbb{E}[\sin(t)]$ varie en fonction de $t$. Par conséquent, l'espérance de \(X_t\) n'est pas constante, car elle dépend de \(t\) à travers le terme \(\sin(t)\). Ainsi nous n'avons pas besoin de la fonction d'autocovariance puisqu'on sait que le processus n'est pas stationnaire.\newline
-
-```{r}
-set.seed(123)
-n <- 200
-
-trajectoire_a <- function(n) {
-  epsilon <- rnorm(n)
-  X <- rep(0, n)
-  for (t in 2:n) {
-    X[t] <- sin(t) + epsilon[t] - 0.2 * epsilon[t - 1]
-  }
-  return(X)
-}
-
-X1 <- trajectoire_a(n)
-X2 <- trajectoire_a(n)
-X3 <- trajectoire_a(n)
-
-plot(X1, type = "l", ylim = range(c(X1, X2, X3)), ylab = "X_t", xlab = "t")
-lines(X2)
-lines(X3)
-```
-
-
-## a) $X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}$
+**1. Espérance**
 
 $\mathbb{E}[\epsilon_t] = 0$ puisqu'il s'agit d'un bruit blanc et $\mathbb{E}[\sin(t)]$ varie en fonction de $t$. Par conséquent, l'espérance de \(X_t\) n'est pas constante, car elle dépend de \(t\) à travers le terme \(\sin(t)\).
+
+**2. Autocovariance**
 
 La fonction d'autocovariance est définie par $\gamma_X(h) = \text{Cov}(X_t, X_{t+h}), \quad h = 0, \pm 1, \pm 2, \ldots$. Pour \(X_t\), nous avons :
 
 \[ \gamma_X(h) = \text{Cov}(\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}, \sin(t+h) + \varepsilon_{t+h} - 0.2 \times \varepsilon_{t+h-1}) \]
 
 Puisque \( \varepsilon_t \) est un bruit blanc de variance \(\sigma^2\) et est indépendant des termes précédents et suivants, la seule autocovariance non nulle se produit lorsque \( h = 0 \) ou \( h = \pm1 \). Cela donne :
+\begin{align*}
+\gamma_X(0)   &= \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) \\
+\gamma_X(1)   &= \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t+1} - 0.2 \times \varepsilon_t) \\
+\gamma_X(-1)  &= \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2})
+\end{align*}
 
-\[ \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) \]
-\[ \gamma_X(1) = \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t+1} - 0.2 \times \varepsilon_t) \]
-\[ \gamma_X(-1) = \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2}) \]
 
-Calculons ces valeurs :
-
-- Pour \( h = 0 \), \( \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) = \sigma^2 + 0.04\sigma^2 = 1.04\sigma^2 \) (car \( \sigma^2 = 1 \) dans les simulations).
-- Pour \( h = 1 \) ou \( h = -1 \), \( \gamma_X(1) = \gamma_X(-1) = -0.2\sigma^2 \).
+- \( h = 0 \) : \( \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) = \sigma^2 + 0.04\sigma^2 = 1.04\sigma^2 \) (car \( \sigma^2 = 1 \) dans les simulations).
+- \( h = 1 \) ou \( h = -1 \) : \( \gamma_X(1) = \gamma_X(-1) = -0.2\sigma^2 \).
 
 La dépendance de \( \gamma_X(h) \) sur \( t \) (due à la présence de \( \sin(t) \) et \( \sin(t+h) \)) indique que le processus n'est pas stationnaire au second ordre.
 
-Pour le rendre stationnaire, nous allons différencier le processus à l'ordre 1.
+**3. Différenciation**
 
-$\Delta X_t = X_t - X_{t-1}$
-$\Delta X_t = (\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}) - (\sin(t-1) + \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2})$
-$\Delta X_t = (\sin(t) - \sin(t-1)) + (\varepsilon_t - \varepsilon_{t-1}) - 0.2 \times (\varepsilon_{t-1} - \varepsilon_{t-2})$
+Pour le rendre stationnaire, nous allons différencier le processus à l'ordre 1.
+\begin{align*}
+\Delta X_t &= X_t - X_{t-1} \\
+\Delta X_t &= (\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}) - (\sin(t-1) + \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2}) \\
+\Delta X_t &= (\sin(t) - \sin(t-1)) + (\varepsilon_t - \varepsilon_{t-1}) - 0.2 \times (\varepsilon_{t-1} - \varepsilon_{t-2})
+\end{align*}
 
 - L’espérance :
 
 L'espérance du processus différencié, \( E[\Delta X_t] \), est la différence entre les espérances des termes à \( t \) et \( t-1 \). Étant donné que l'espérance de \( \varepsilon_t \) est 0, l'espérance de \( \Delta X_t \) devient :
 
-     \[ E[\Delta X_t] = E[\sin(t) - \sin(t-1)] \]
+\[ E[\Delta X_t] = E[\sin(t) - \sin(t-1)] \]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- L'autocovariance :
 
 
 
@@ -121,14 +72,15 @@ L'espérance du processus différencié, \( E[\Delta X_t] \), est la différence
 
 ## b) $\, X_t = \varepsilon_t - \varepsilon_{t-1}$
 
+**1. Espérance**
+
 \[
 E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon_{t-1}) = 0 - 0 = 0
 \]
 
-La fonction d'autocovariance est définie comme : $\gamma_X(h) = \text{Cov}(X_t, X_{t+h}), \quad h = 0, \pm 1, \pm 2, \ldots$.
+**2. Autocovariance**
 
-- **Pour \( h = 0 \) :**
-
+- Pour \( h = 0 \) :
 \begin{align*}
 \gamma_X(0) &= \text{Cov}(X_t, X_{t + 0}) \\
 &= \text{Var}(X_t) \\
@@ -137,10 +89,7 @@ La fonction d'autocovariance est définie comme : $\gamma_X(h) = \text{Cov}(X_t,
 &= 2\sigma^2
 \end{align*}
 
-
-- **Pour \( h = 1 \) :**
-
-
+- Pour \( h = 1 \) :
 \begin{align*}
 \gamma_X(1) &= \text{Cov}(X_t, X_{t+1}) \\
 &= \text{Cov}(\varepsilon_t - \varepsilon_{t-1}, \varepsilon_{t+1} - \varepsilon_t) \\
@@ -148,36 +97,175 @@ La fonction d'autocovariance est définie comme : $\gamma_X(h) = \text{Cov}(X_t,
 \end{align*}
 
 D'après la définition du bruit blanc, $\text{Cov}(\varepsilon_t, \varepsilon_s) = 0, \quad t \neq s$, alors :
-
-
 \begin{align*}
 \gamma_X(1) &= 0 - \text{Var}(\varepsilon_t) - 0 + 0 \\
 &= -\text{Var}(\varepsilon_t) \\
 &= -\sigma^2
 \end{align*}
 
-- **Pour \( h > 1 \) ou \( h < -1 \) :**
+- Pour \( h > 1 \) ou \( h < -1 \) :
 Les termes sont indépendants, donc \( \gamma_X(h) = 0 \).
 
 Le processus \( X_t = \varepsilon_t - \varepsilon_{t-1} \) est stationnaire au second ordre car son espérance est constante et sa fonction d'autocovariance ne dépend que de \( h \) et non de \( t \).
 
 
-Sous sa forme canonique $X_t = \varepsilon_t - \varepsilon_{t-1}$, le processus s'écrit comme : $X_t = (1 - B)\varepsilon_t$ correspondant à un ARMA(0,1) ou un MA(1).
+**3. Forme canonique**
+
+Le processus, sous sa forme canonique, s'écrit comme : $X_t = (1 - B)\varepsilon_t$ correspondant à un un MA(1).
 
 ```{r}
 set.seed(123)
-b1 <- arima.sim(model = list(ma = -1), n = 200, sd = 1)
-b2 <- arima.sim(model = list(ma = -1), n = 200, sd = 1)
-b3 <- arima.sim(model = list(ma = -1), n = 200, sd = 1)
+b1 <- arima.sim(model = list(ma = -1), n = 200)
+b2 <- arima.sim(model = list(ma = -1), n = 200)
+b3 <- arima.sim(model = list(ma = -1), n = 200)
 
 plot(b1, type="l", col="black", main="Trajectoires MA(1)", xlab = "Temps", ylab = "Valeurs")
 lines(b2, col="limegreen")
 lines(b3, col="lightblue")
-
 ```
 
+## c) $X_t = A\cos(\omega t) + B\sin(\omega t)$ Je suis vraiment pas sur de ça, j'arrive pas à trouver la forme canonique donc faut probablement le différencier et c'est probablement faux
+
+**1. Espérance**
+
+$E[X_t] = E[A]\cos(\omega t) + E[B]\sin(\omega t) = 0$
+
+**2. Autocovariance**
+\begin{align*}
+\gamma(s, t) &= E\left[(A\cos(\omega s) + B\sin(\omega s))(A\cos(\omega t) + B\sin(\omega t))\right] \\
+&= E\left[A^2\cos(\omega s)\cos(\omega t) + AB\cos(\omega s)\sin(\omega t) + AB\sin(\omega s)\cos(\omega t) + B^2\sin(\omega s)\sin(\omega t)\right]
+\end{align*}
 
 
+Étant donné que $A$ et $B$ sont indépendantes, on peut simplifier cette expression en utilisant \( E[A^2] \), \( E[B^2] \) et le fait que \( E[AB] = E[A]E[B] = 0 \) :
+
+\[ \gamma(s, t) = E[A^2]\cos(\omega s)\cos(\omega t) + E[B^2]\sin(\omega s)\sin(\omega t) \]
+
+Puisque \( A \) et \( B \) ont une variance finie, disons \( \sigma_A^2 \) et \( \sigma_B^2 \) respectivement, nous pouvons remplacer \( E[A^2] \) et \( E[B^2] \) par leurs variances :
+
+\[ \gamma(s, t) = \sigma_A^2\cos(\omega s)\cos(\omega t) + \sigma_B^2\sin(\omega s)\sin(\omega t) \]
+
+Nous pouvons utiliser l'identité trigonométrique pour les produits de cosinus et de sinus :
+
+\[
+\cos x \cos y = \frac{1}{2}[\cos(x-y) + \cos(x+y)]
+\]
+\[
+\sin x \sin y = \frac{1}{2}[\cos(x-y) - \cos(x+y)]
+\]
+
+En appliquant ces identités à notre expression, nous obtenons :
+
+\[
+\gamma(s, t) = \sigma_A^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) + \cos(\omega s + \omega t)] + \sigma_B^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) - \cos(\omega s + \omega t)]
+\]
+
+En simplifiant cette expression, les termes en \( \cos(\omega s + \omega t) \) se soustraient mutuellement, laissant :
+
+\[
+\gamma(s, t) = \frac{1}{2}(\sigma_A^2 + \sigma_B^2) \cos(\omega(t - s))
+\]
+
+Le processus \( X_t = A\cos(\omega t) + B\sin(\omega t) \) est stationnaire au second ordre, car son espérance est constante (et égale à zéro) et sa fonction d'autocovariance dépend uniquement de la différence entre les temps \( s \) et \( t \), et non des temps individuels.
+
+**3. Forme canonique**
+
+
+
+
+
+
+
+## d) $X_t = 2X_{t-1} - X_{t-2} + \varepsilon_t$
+
+**1. Espérance :**
+\begin{align*}
+\mathbb{E}[X_t] & = 2\mathbb{E}[X_t] - \mathbb{E}[X_t] + \mathbb{E}[\varepsilon_t] \\
+\mathbb{E}[X_t] & = \mathbb{E}[X_t] + 0
+\end{align*}
+
+Le processus est égale à lui-même et donc constant dans le temps.
+
+**2. Fonction d'autocovariance**
+
+
+**3. Forme canonique**
+
+Le modèle peut se réécrire sous sa forme canonique comme : $(1 - 2B + B^2) X_t = \varepsilon_t$, correspondant à un AR(2).
+
+On cherche les racines du polynome caractéristique $1-2r+r^2=0$ :
+
+\[ r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
+
+Dans notre cas, \( a = 1 \), \( b = -2 \) et \( c = 1 \). Les racines seront donc :
+
+\[ r = \frac{-(-2) \pm \sqrt{(-2)^2 - 4 \cdot 1 \cdot 1}}{2 \cdot 1} \]
+\[ r = \frac{2 \pm \sqrt{4 - 4}}{2} \]
+\[ r = \frac{2 \pm \sqrt{0}}{2} \]
+\[ r = \frac{2}{2} \]
+\[ r = 1 \]
+
+Le processus n'est donc pas stationnaire puisque les racines sont sur le cercle unité.
+
+
+
+## e) $\quad X_t - 4X_{t-1} = \varepsilon_t - 0.25\varepsilon_{t-1}$
+
+**1. Espérance**
+
+L'espérance \( E(X_t) \) d'un processus stationnaire doit être constante. Calculons-la :
+
+\[
+E(X_t - 4X_{t-1}) = E(\varepsilon_t - 0.25\varepsilon_{t-1})
+\]
+
+Étant donné que \( \varepsilon_t \) est un bruit blanc, \( E(\varepsilon_t) = 0 \) pour tout \( t \). Par conséquent :
+
+\[
+E(X_t - 4X_{t-1}) = 0 - 0.25 \times 0 = 0
+\]
+
+Cela implique que \( E(X_t) = 4E(X_{t-1}) \). Pour qu'un processus soit stationnaire, il faut que \( E(X_t) \) soit le même pour tout \( t \). Ici, nous n'avons pas assez d'informations pour déterminer si \( E(X_t) \) est constant sans connaître la valeur de \( E(X_{t-1}) \). 
+
+
+**2. Fonction d'autocovariance**
+
+Comme pour l'espérance, nous n'avons pas assez d'informations pour déterminer si \( E(X_t) \) est constant sans connaître la valeur de \( E(X_{t-1}) \).
+
+**3. Forme canonique**
+
+Nous pouvons réécrire le processus comme $(1 - 4B)X_t = (1 - 0.25B)\varepsilon_t$.
+
+Solution de l'équation caractéristique pour la partie AR :
+
+$1-4r=0$
+$r=0.25$
+
+Solution de l'équation caractéristique pour la partie MA :
+
+$1-0.25r=0$
+$r=4$
+
+Notre processus est donc un ARMA(0.25, 4)
+
+```{r}
+set.seed(123) # Pour assurer la reproductibilité
+
+# Paramètres du modèle
+ar_param <- 4     # Paramètre AR
+ma_param <- -0.25 # Paramètre MA
+
+# Simulation du processus ARMA(1,1)
+b1 <- arima.sim(model = list(ar = ar_param, ma = ma_param), n = 200)
+b2 <- arima.sim(model = list(ar = ar_param, ma = ma_param), n = 200)
+b3 <- arima.sim(model = list(ar = ar_param, ma = ma_param), n = 200)
+
+# Tracer les graphiques
+plot(b1, type="l", col="black", main="Trajectoires ARMA(1,1)", xlab = "Temps", ylab = "Valeurs")
+lines(b2, col="limegreen")
+lines(b3, col="lightblue")
+
+```
 
 
 # Exercice 2
