@@ -9,6 +9,10 @@ a : X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}
 
 X_t = \varepsilon_t - \varepsilon_{t-1}
 
+d) \( X_t = 2X_{t-1} - X_{t-2} + \varepsilon_t \)
+
+e) \( X_t - 4X_{t-1} = \varepsilon_t - 0.25\varepsilon_{t-1} \)
+
 
 Représenter trois trajectoires de taille n = 200 de chaque processus sur un même graphique (si possible avec des couleurs différentes).
 

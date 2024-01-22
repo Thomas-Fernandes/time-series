@@ -202,7 +202,7 @@ Le processus est égale à lui-même et donc constant dans le temps.
 
 Le modèle peut se réécrire sous sa forme canonique comme : $(1 - 2B + B^2) X_t = \varepsilon_t$, correspondant à un AR(2).
 
-On cherche les racines du polynome caractéristique $1-2r+r^2=0$ :
+On cherche les racines du polynôme caractéristique $1-2r+r^2=0$ :
 
 \[ r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
 
@@ -216,6 +216,39 @@ Dans notre cas, \( a = 1 \), \( b = -2 \) et \( c = 1 \). Les racines seront don
 
 Le processus n'est donc pas stationnaire puisque les racines sont sur le cercle unité.
 
+**4. Différenciation**
+
+Pour le rendre stationnaire, on va différencier le processus à l'ordre 2.
+
+\[ \Delta X_t = (2X_{t-1} - X_{t-2} + \varepsilon_t) - X_{t-1} \]
+\[ \Delta X_t = X_{t-1} - X_{t-2} + \varepsilon_t \]
+
+\[ \Delta^2 X_t = \Delta X_t - \Delta X_{t-1} \]
+\[ \Delta^2 X_t = (X_{t-1} - X_{t-2} + \varepsilon_t) - (X_{t-2} - X_{t-3} + \varepsilon_{t-1}) \]
+\[ \Delta^2 X_t = X_{t-1} - 2X_{t-2} + X_{t-3} + \varepsilon_t - \varepsilon_{t-1} \]
+
+Le processus correspond donc à un ARIMA(2,2,0).
+
+```{r}
+set.seed(123)  # Pour la reproductibilité des résultats
+n <- 200  # Nombre de points à simuler
+sigma <- 1  # Écart-type du bruit blanc
+
+# Initialiser les valeurs de départ
+X <- numeric(n)
+X[1] <- rnorm(1, mean = 0, sd = sigma)  # Valeur initiale arbitraire
+X[2] <- rnorm(1, mean = 0, sd = sigma)  # Seconde valeur initiale
+
+# Générer le processus différencié d'ordre 2
+for (t in 3:n) {
+    epsilon_t <- rnorm(1, mean = 0, sd = sigma)  # Bruit blanc
+    X[t] <- 2 * X[t-1] - X[t-2] + epsilon_t
+}
+
+# Tracer le processus simulé
+plot(X, type = "l", col = "blue", main = "Processus différencié d'ordre 2", xlab = "Temps", ylab = "Valeurs")
+
+```
 
 
 ## e) $\quad X_t - 4X_{t-1} = \varepsilon_t - 0.25\varepsilon_{t-1}$
