@@ -43,35 +43,24 @@ Puisque \( \varepsilon_t \) est un bruit blanc de variance \(\sigma^2\) et est i
 
 La dépendance de \( \gamma_X(h) \) sur \( t \) (due à la présence de \( \sin(t) \) et \( \sin(t+h) \)) indique que le processus n'est pas stationnaire au second ordre.
 
-**3. Différenciation**
+**3. Décomposition saisonnière**
 
-Pour le rendre stationnaire, nous allons différencier le processus à l'ordre 1.
-\begin{align*}
-\Delta X_t &= X_t - X_{t-1} \\
-\Delta X_t &= (\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}) - (\sin(t-1) + \varepsilon_{t-1} - 0.2 \times \varepsilon_{t-2}) \\
-\Delta X_t &= (\sin(t) - \sin(t-1)) + (\varepsilon_t - \varepsilon_{t-1}) - 0.2 \times (\varepsilon_{t-1} - \varepsilon_{t-2})
-\end{align*}
+Pour rendre ce processus stationnaire, nous allons enlever la composante de saisonnalité. Ainsi :
 
-- L’espérance :
+\(Y_t = X_t - \sin(t) = \varepsilon_t - 0.2 \times \varepsilon_{t-1}\).
 
-L'espérance du processus différencié, \( E[\Delta X_t] \), est la différence entre les espérances des termes à \( t \) et \( t-1 \). Étant donné que l'espérance de \( \varepsilon_t \) est 0, l'espérance de \( \Delta X_t \) devient :
+Le processus peut ainsi être réécris sous la forme $X_t = (1-0.2B)\epsilon_t$, correspondant à un MA(1).
 
-\[ E[\Delta X_t] = E[\sin(t) - \sin(t-1)] \]
+```{r}
+set.seed(123)
+a1 <- arima.sim(model = list(ma = 0.2), n = 200)
+a2 <- arima.sim(model = list(ma = 0.2), n = 200)
+a3 <- arima.sim(model = list(ma = 0.2), n = 200)
 
-- L'autocovariance :
-
-
-
-
-
-
-
-
-
-
-
-
-
+plot(a1, type="l", col="black", main="Trajectoires MA(1)", xlab = "Temps", ylab = "Valeurs")
+lines(a2, col="limegreen")
+lines(a3, col="lightblue")
+```
 
 
 ## b) $\, X_t = \varepsilon_t - \varepsilon_{t-1}$
@@ -172,11 +161,27 @@ En simplifiant cette expression, les termes en \( \cos(\omega s + \omega t) \) s
 
 Le processus \( X_t = A\cos(\omega t) + B\sin(\omega t) \) est stationnaire au second ordre, car son espérance est constante (et égale à zéro) et sa fonction d'autocovariance dépend uniquement de la différence entre les temps \( s \) et \( t \), et non des temps individuels.
 
-**3. Forme canonique**
+```{r}
+n <- 200
+omega <- 2 * pi / 40
 
+set.seed(1)
+A <- rnorm(3)
+B <- rnorm(3)
 
+t <- 1:n
+trajectories <- matrix(0, nrow = n, ncol = 3)
 
+for (i in 1:3) {
+  trajectories[, i] <- A[i] * cos(omega * t) + B[i] * sin(omega * t)
+}
 
+# Tracer les trajectoires
+plot(t, trajectories[, 1], type = 'l', col = 'red', ylim = range(trajectories),
+     xlab = 'Time', ylab = 'X_t', main = 'Three Trajectories of X_t')
+lines(t, trajectories[, 2], col = 'green')
+lines(t, trajectories[, 3], col = 'blue')
+```
 
 
 
