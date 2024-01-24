@@ -230,6 +230,38 @@ Pour le rendre stationnaire, on va différencier le processus à l'ordre 2.
 Le processus correspond donc à un ARIMA(2,2,0).
 
 ```{r}
+# Fonction de simulation personnalisée
+simulate_process <- function(n) {
+  epsilon <- rnorm(n)
+  X <- rep(0, n)
+  delta2_X <- rep(0, n)
+
+  X[1] <- rnorm(1)
+  X[2] <- rnorm(1)
+  X[3] <- rnorm(1)
+
+  for (t in 4:n) {
+    X[t] <- 2*X[t-1] - X[t-2] + epsilon[t]
+    delta2_X[t] <- X[t-1] - 2*X[t-2] + X[t-3] + epsilon[t] - epsilon[t-1]
+  }
+
+  return(delta2_X)
+}
+
+# Génération des trajectoires
+n = 200
+trajectory1 <- simulate_process(n)
+trajectory2 <- simulate_process(n)
+trajectory3 <- simulate_process(n)
+
+# Tracé des trajectoires
+plot(trajectory1, type="l", col="black", main="Trajectoires du processus différencié à l'ordre 2", xlab="Temps", ylab="Valeurs")
+lines(trajectory2, col="limegreen")
+lines(trajectory3, col="lightblue")
+```
+
+
+```{r}
 set.seed(123)  # Pour la reproductibilité des résultats
 n <- 200  # Nombre de points à simuler
 sigma <- 1  # Écart-type du bruit blanc
