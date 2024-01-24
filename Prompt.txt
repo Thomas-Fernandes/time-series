@@ -37,7 +37,7 @@ h) Quel modèle vous semble le plus pertinent : c) suivi de e) ou f) ou g)? Il y
 i) Simuler sous \( R \), pour \( n = 500 \) le processus
 
 \[
-(1 - B^{52})(1 - 2B + B^2)(1 - 2B)X_t = \varepsilon_t - \varepsilon_{t-1}, \quad t = 1, \ldots, n,
+(1 - B^{52})(1 - 2B + B^2)(1 - 2B)X_t = (1-B) \varepsilon_t, \quad t = 1, \ldots, n,
 \]
 
 que l'on aura pris soin de mettre sous sa forme la plus réduite, en faisant l'hypothèse que les résidus sont i.i.d. gaussiens \( N(0,1) \). Tracer pour chaque simulation la série originale des \( X_t \), la série différenciée \( X_t - X_{t-1} \) et la série

@@ -15,22 +15,26 @@ library(kableExtra)
 library(knitr)
 ```
 
-
 # Exercice 1
 
 ## a) $X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}$
 
 **1. Espérance**
 
-$\mathbb{E}[\epsilon_t] = 0$ puisqu'il s'agit d'un bruit blanc et $\mathbb{E}[\sin(t)]$ varie en fonction de $t$. Par conséquent, l'espérance de \(X_t\) n'est pas constante, car elle dépend de \(t\) à travers le terme \(\sin(t)\).
+\begin{align*}
+\mathbb{E}[X_t] &= \mathbb{E}[\sin(t)] + \mathbb{E}[\varepsilon_t] - 0.2\mathbb{E}[\varepsilon_{t-1}] \\
+\mathbb{E}[X_t] &= \mathbb{E}[\sin(t)] + 0 - 0.2 \times 0 \\
+\mathbb{E}[X_t] &= \mathbb{E}[\sin(t)]
+\end{align*}
+
+Par conséquent, l'espérance de $X_t$ n'est pas constante car elle dépend de t à travers le terme $\sin(t)$.
 
 **2. Autocovariance**
 
-La fonction d'autocovariance est définie par $\gamma_X(h) = \text{Cov}(X_t, X_{t+h}), \quad h = 0, \pm 1, \pm 2, \ldots$. Pour \(X_t\), nous avons :
-
 \[ \gamma_X(h) = \text{Cov}(\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}, \sin(t+h) + \varepsilon_{t+h} - 0.2 \times \varepsilon_{t+h-1}) \]
 
-Puisque \( \varepsilon_t \) est un bruit blanc de variance \(\sigma^2\) et est indépendant des termes précédents et suivants, la seule autocovariance non nulle se produit lorsque \( h = 0 \) ou \( h = \pm1 \). Cela donne :
+La covariance des sinus s'annule donc :
+
 \begin{align*}
 \gamma_X(0)   &= \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) \\
 \gamma_X(1)   &= \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t+1} - 0.2 \times \varepsilon_t) \\
@@ -41,7 +45,7 @@ Puisque \( \varepsilon_t \) est un bruit blanc de variance \(\sigma^2\) et est i
 - \( h = 0 \) : \( \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) = \sigma^2 + 0.04\sigma^2 = 1.04\sigma^2 \) (car \( \sigma^2 = 1 \) dans les simulations).
 - \( h = 1 \) ou \( h = -1 \) : \( \gamma_X(1) = \gamma_X(-1) = -0.2\sigma^2 \).
 
-La dépendance de \( \gamma_X(h) \) sur \( t \) (due à la présence de \( \sin(t) \) et \( \sin(t+h) \)) indique que le processus n'est pas stationnaire au second ordre.
+Le processus n'est ainsi pas stationnaire puisque son espérance n'est pas constante.
 
 **3. Décomposition saisonnière**
 
@@ -57,11 +61,11 @@ a1 <- arima.sim(model = list(ma = 0.2), n = 200)
 a2 <- arima.sim(model = list(ma = 0.2), n = 200)
 a3 <- arima.sim(model = list(ma = 0.2), n = 200)
 
-plot(a1, type="l", col="black", main="Trajectoires MA(1)", xlab = "Temps", ylab = "Valeurs")
+plot(a1, type="l", col="black", main="Trajectoires MA(1)",
+     xlab = "Temps", ylab = "Valeurs")
 lines(a2, col="limegreen")
 lines(a3, col="lightblue")
 ```
-
 
 ## b) $\, X_t = \varepsilon_t - \varepsilon_{t-1}$
 
@@ -79,7 +83,7 @@ E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon
 &= \text{Var}(X_t) \\
 &= \text{Var}(\varepsilon_t) + \text{Var}(\varepsilon_{t-1}) \\
 &= \sigma^2 + \sigma^2 \\
-&= 2\sigma^2
+&= 2
 \end{align*}
 
 - Pour \( h = 1 \) :
@@ -93,11 +97,8 @@ D'après la définition du bruit blanc, $\text{Cov}(\varepsilon_t, \varepsilon_s
 \begin{align*}
 \gamma_X(1) &= 0 - \text{Var}(\varepsilon_t) - 0 + 0 \\
 &= -\text{Var}(\varepsilon_t) \\
-&= -\sigma^2
+&= -1
 \end{align*}
-
-- Pour \( h > 1 \) ou \( h < -1 \) :
-Les termes sont indépendants, donc \( \gamma_X(h) = 0 \).
 
 Le processus \( X_t = \varepsilon_t - \varepsilon_{t-1} \) est stationnaire au second ordre car son espérance est constante et sa fonction d'autocovariance ne dépend que de \( h \) et non de \( t \).
 
@@ -117,11 +118,12 @@ lines(b2, col="limegreen")
 lines(b3, col="lightblue")
 ```
 
-## c) $X_t = A\cos(\omega t) + B\sin(\omega t)$ Je suis vraiment pas sur de ça, j'arrive pas à trouver la forme canonique donc faut probablement le différencier et c'est probablement faux
+## c) $X_t = A\cos(\omega t) + B\sin(\omega t)$
 
 **1. Espérance**
 
-$E[X_t] = E[A]\cos(\omega t) + E[B]\sin(\omega t) = 0$
+$E[X_t] = E[A]\cos(\omega t) + E[B]\sin(\omega t)$
+$E[X_t] = E[A] \times E[\cos(\omega t)] + E[B] \times E[\sin(\omega t)] = 0$
 
 **2. Autocovariance**
 \begin{align*}
@@ -134,56 +136,39 @@ $E[X_t] = E[A]\cos(\omega t) + E[B]\sin(\omega t) = 0$
 
 \[ \gamma(s, t) = E[A^2]\cos(\omega s)\cos(\omega t) + E[B^2]\sin(\omega s)\sin(\omega t) \]
 
-Puisque \( A \) et \( B \) ont une variance finie, disons \( \sigma_A^2 \) et \( \sigma_B^2 \) respectivement, nous pouvons remplacer \( E[A^2] \) et \( E[B^2] \) par leurs variances :
+Puisque \( A \) et \( B \) ont une variance finie on peut les remplacer par leurs variances :
 
 \[ \gamma(s, t) = \sigma_A^2\cos(\omega s)\cos(\omega t) + \sigma_B^2\sin(\omega s)\sin(\omega t) \]
-
-Nous pouvons utiliser l'identité trigonométrique pour les produits de cosinus et de sinus :
-
-\[
-\cos x \cos y = \frac{1}{2}[\cos(x-y) + \cos(x+y)]
-\]
-\[
-\sin x \sin y = \frac{1}{2}[\cos(x-y) - \cos(x+y)]
-\]
-
-En appliquant ces identités à notre expression, nous obtenons :
 
 \[
 \gamma(s, t) = \sigma_A^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) + \cos(\omega s + \omega t)] + \sigma_B^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) - \cos(\omega s + \omega t)]
 \]
 
-En simplifiant cette expression, les termes en \( \cos(\omega s + \omega t) \) se soustraient mutuellement, laissant :
-
 \[
 \gamma(s, t) = \frac{1}{2}(\sigma_A^2 + \sigma_B^2) \cos(\omega(t - s))
 \]
 
-Le processus \( X_t = A\cos(\omega t) + B\sin(\omega t) \) est stationnaire au second ordre, car son espérance est constante (et égale à zéro) et sa fonction d'autocovariance dépend uniquement de la différence entre les temps \( s \) et \( t \), et non des temps individuels.
+Le processus \( X_t = A\cos(\omega t) + B\sin(\omega t) \) est stationnaire au second ordre, car son espérance est constante et sa fonction d'autocovariance dépend uniquement de la différence entre les temps \( s \) et \( t \).
 
 ```{r}
+set.seed(123)
 n <- 200
-omega <- 2 * pi / 40
-
-set.seed(1)
-A <- rnorm(3)
-B <- rnorm(3)
+omega <- pi/30
+A <- rnorm(n)
+B <- rnorm(n)
 
 t <- 1:n
-trajectories <- matrix(0, nrow = n, ncol = 3)
+trajectoires <- matrix(0, nrow = n, ncol = 3)
 
 for (i in 1:3) {
-  trajectories[, i] <- A[i] * cos(omega * t) + B[i] * sin(omega * t)
+  trajectoires[, i] <- A[i] * cos(omega * t) + B[i] * sin(omega * t)
 }
 
-# Tracer les trajectoires
-plot(t, trajectories[, 1], type = 'l', col = 'red', ylim = range(trajectories),
-     xlab = 'Time', ylab = 'X_t', main = 'Three Trajectories of X_t')
-lines(t, trajectories[, 2], col = 'green')
-lines(t, trajectories[, 3], col = 'blue')
+plot(t, trajectoires[, 1], type = 'l', col = 'black', ylim = range(trajectoires),
+     xlab = 'Time', ylab = 'X_t', main = 'Trajectoires')
+lines(t, trajectoires[, 2], col = 'limegreen')
+lines(t, trajectoires[, 3], col = 'lightblue')
 ```
-
-
 
 ## d) $X_t = 2X_{t-1} - X_{t-2} + \varepsilon_t$
 
@@ -194,9 +179,6 @@ lines(t, trajectories[, 3], col = 'blue')
 \end{align*}
 
 Le processus est égale à lui-même et donc constant dans le temps.
-
-**2. Fonction d'autocovariance**
-
 
 **3. Forme canonique**
 
@@ -230,8 +212,7 @@ Pour le rendre stationnaire, on va différencier le processus à l'ordre 2.
 Le processus correspond donc à un ARIMA(2,2,0).
 
 ```{r}
-# Fonction de simulation personnalisée
-simulate_process <- function(n) {
+processus_d <- function(n) {
   epsilon <- rnorm(n)
   X <- rep(0, n)
   delta2_X <- rep(0, n)
@@ -248,65 +229,18 @@ simulate_process <- function(n) {
   return(delta2_X)
 }
 
-# Génération des trajectoires
 n = 200
-trajectory1 <- simulate_process(n)
-trajectory2 <- simulate_process(n)
-trajectory3 <- simulate_process(n)
+d1 <- processus_d(n)
+d2 <- processus_d(n)
+d3 <- processus_d(n)
 
-# Tracé des trajectoires
-plot(trajectory1, type="l", col="black", main="Trajectoires du processus différencié à l'ordre 2", xlab="Temps", ylab="Valeurs")
-lines(trajectory2, col="limegreen")
-lines(trajectory3, col="lightblue")
-```
-
-
-```{r}
-set.seed(123)  # Pour la reproductibilité des résultats
-n <- 200  # Nombre de points à simuler
-sigma <- 1  # Écart-type du bruit blanc
-
-# Initialiser les valeurs de départ
-X <- numeric(n)
-X[1] <- rnorm(1, mean = 0, sd = sigma)  # Valeur initiale arbitraire
-X[2] <- rnorm(1, mean = 0, sd = sigma)  # Seconde valeur initiale
-
-# Générer le processus différencié d'ordre 2
-for (t in 3:n) {
-    epsilon_t <- rnorm(1, mean = 0, sd = sigma)  # Bruit blanc
-    X[t] <- 2 * X[t-1] - X[t-2] + epsilon_t
-}
-
-# Tracer le processus simulé
-plot(X, type = "l", col = "blue", main = "Processus différencié d'ordre 2", xlab = "Temps", ylab = "Valeurs")
-
+plot(d1, type="l", col="black", main="Trajectoires", xlab="Temps", ylab="Valeurs")
+lines(d2, col="limegreen")
+lines(d3, col="lightblue")
 ```
 
 
 ## e) $\quad X_t - 4X_{t-1} = \varepsilon_t - 0.25\varepsilon_{t-1}$
-
-**1. Espérance**
-
-L'espérance \( E(X_t) \) d'un processus stationnaire doit être constante. Calculons-la :
-
-\[
-E(X_t - 4X_{t-1}) = E(\varepsilon_t - 0.25\varepsilon_{t-1})
-\]
-
-Étant donné que \( \varepsilon_t \) est un bruit blanc, \( E(\varepsilon_t) = 0 \) pour tout \( t \). Par conséquent :
-
-\[
-E(X_t - 4X_{t-1}) = 0 - 0.25 \times 0 = 0
-\]
-
-Cela implique que \( E(X_t) = 4E(X_{t-1}) \). Pour qu'un processus soit stationnaire, il faut que \( E(X_t) \) soit le même pour tout \( t \). Ici, nous n'avons pas assez d'informations pour déterminer si \( E(X_t) \) est constant sans connaître la valeur de \( E(X_{t-1}) \). 
-
-
-**2. Fonction d'autocovariance**
-
-Comme pour l'espérance, nous n'avons pas assez d'informations pour déterminer si \( E(X_t) \) est constant sans connaître la valeur de \( E(X_{t-1}) \).
-
-**3. Forme canonique**
 
 Nous pouvons réécrire le processus comme $(1 - 4B)X_t = (1 - 0.25B)\varepsilon_t$.
 
@@ -320,7 +254,19 @@ Solution de l'équation caractéristique pour la partie MA :
 $1-0.25r=0$
 $r=4$
 
-Notre processus est donc un ARMA(0.25, 4)
+La racine est l’extérieur du cercle unité, on inverse et on trouve $r=0.25$. Notre processus est donc un ARMA(0.25, 0.25).
+
+
+```{r}
+set.seed(123)
+e1 <- arima.sim(model = list(ma = 0.25, ar = 0.25), n = 200)
+e2 <- arima.sim(model = list(ma = 0.25, ar = 0.25), n = 200)
+e3 <- arima.sim(model = list(ma = 0.25, ar = 0.25), n = 200)
+
+plot(e1, type="l", col="black", main="Trajectoires MA(1)", xlab = "Temps", ylab = "Valeurs")
+lines(e2, col="limegreen")
+lines(e3, col="lightblue")
+```
 
 
 # Exercice 2
@@ -329,11 +275,9 @@ Notre processus est donc un ARMA(0.25, 4)
 
 ```{r}
 source("prix.R")
-
 plot(p1, type = "l", main = "Série Temporelle des Prix", xlab = "Temps", ylab = "Prix")
 ```
-D'après le graphique, on peut émettre l'hypothèse que la série est stationnaire en moyenne et en variance puisque la moyenne est constante et la variance homoscédastique. De plus, la covariance entre 2 points semble constante, l'écart entre chaque fluctuation est le même et laisse penser à une saisonalité.
-
+D'après le graphique, on peut émettre l'hypothèse que la série est stationnaire en moyenne et en variance puisque la moyenne est constante et la variance homoscédastique. De plus, la covariance entre 2 points semble constante, l'écart entre chaque fluctuation est le même et laisse penser à une saisonnalité. On peut cependant constater une légère tendance à la baisse à partir de 2019.
 
 ## b) Fonctions d'autocorrélation acf et pacf
 
@@ -344,7 +288,6 @@ spectrum(p1)
 p1_decomp <- decompose(p1)
 plot(p1_decomp)
 ```
-
 On remarque que la saisonalité est très marquée et régulière, tandis que la tendance est plus compliquée à discerner, même s'il semble y avoir une tendance à la baisse.
 
 ## c) $X_t = m + A \sin\left(\frac{2\pi t}{T}\right) + B \cos\left(\frac{2\pi t}{T}\right) + Y_t$
@@ -370,12 +313,9 @@ m <- coef(reg_model)[1]
 A <- coef(reg_model)[2]
 B <- coef(reg_model)[3]
 
-#centrer les résidus
 Zt <- reg_model$residuals - mean(reg_model$residuals)
 
-#Test de Dickey-fuller (test de stationnarité)
 adf_test <- adf.test(Zt)
-
 summary(reg_model)
 adf_test
 ```
@@ -394,18 +334,13 @@ pacf(Zt)
 $Z_t$ n'est pas un bruit blanc puisqu'il y a des autocorrelations significatives sur l'acf comme sur le pacf, suggérant que notre modèle contiendra une partie AR et une partie MA. Sur la partie AR, le dernier retard est atteint en lag = 4 et pour la partie MA, le dernier retard est atteint en lag = 6. Nous allons ainsi tester par le moyen d'une boucle tous les modèles en faisant varier la partie AR de 0 à 4 et la partie MA de 0 à 6. Pour chaque modèle, on vérifiera les t.values associées à chaque coefficients $coef/s.e.$ en considérant que si sa valeur est inférieure à 1.96, considère la t.value comme non significative.
 
 ```{r}
-library(forecast)
-
-# Generate all possible combinations of AR and MA orders
-orders <- expand.grid(ar = 0:4, ma = 0:6)[-1, ] # exclude the case where both ar and ma are zero
-
-# Fit an ARIMA model for each combination
+orders <- expand.grid(ar = 0:4, ma = 0:6)[-1, ]
 models <- list()
+
 for (i in seq(nrow(orders))) {
   models[[i]] <- Arima(Zt, order = c(orders[i, "ar"], 0, orders[i, "ma"]))
 }
 
-# Compute the AIC and count non-significant t values for each model
 results <- data.frame(AR = rep(NA, nrow(orders)),
                       MA = rep(NA, nrow(orders)),
                       AIC = rep(NA, nrow(orders)),
@@ -445,10 +380,7 @@ t_future <- length(p1) + 1:length(Zt_forecast$mean)
 sin_term_future <- sin(2 * pi * t_future / 52)
 cos_term_future <- cos(2 * pi * t_future / 52)
 Xt_future <- m + A * sin_term_future + B * cos_term_future + Zt_forecast$mean
-
-# Afficher les prédictions pour Xt
 Xt_future
-
 ```
 
 ## f) SARIMA
@@ -477,10 +409,3 @@ kbl(january_forecast_diff, booktabs = TRUE) %>%
 ```
 
 ## h) Modèle le plus pertinent
-
-## i) 
-
-$(1 - B^2)(1 - 2B + B^2)(1 - 2B)X_t = \varepsilon_t - \varepsilon_{t-1}$\\
-$(1 - B^2)(1 - 2B + B^2)(1 - 2B) = (1 - B)(1 + B)(1 - B)(1 - B) = (1 - B)^3(1 + B)$\\
-$(1 - B)^3(1 + B)X_t = \varepsilon_t - \varepsilon_{t-1}$\\
-
