@@ -1,7 +1,8 @@
 ---
-title: "Script"
+title: "Projet de Séries temporelles, M1 IES-D3S"
 output: pdf_document
 date: "2024-01-16"
+author: "Thomas Fernandes, Vanessa Kenniche, Yassine Ouerghi"
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +14,8 @@ library(tseries)
 library(forecast)
 library(kableExtra)
 library(knitr)
+library(sarima)
+library(TSA)
 ```
 
 # Exercice 1
@@ -127,7 +130,7 @@ E[X_t] &= E[A] \times E[\cos(\omega t)] + E[B] \times E[\sin(\omega t)] = 0
 &= E\left[A^2\cos(\omega s)\cos(\omega t) + AB\cos(\omega s)\sin(\omega t) + AB\sin(\omega s)\cos(\omega t) + B^2\sin(\omega s)\sin(\omega t)\right]
 \end{align*}
 
-Étant donné que $A$ et $B$ sont indépendantes, on peut simplifier cette expression en utilisant \( E[A^2] \), \( E[B^2] \) et le fait que \( E[AB] = E[A]E[B] = 0 \) :
+Étant donné que $A$ et $B$ sont indépendants, on peut simplifier cette expression en utilisant \( E[A^2] \), \( E[B^2] \) et le fait que \( E[AB] = E[A]E[B] = 0 \) :
 
 \[ \gamma(s, t) = E[A^2]\cos(\omega s)\cos(\omega t) + E[B^2]\sin(\omega s)\sin(\omega t) \]
 
@@ -160,7 +163,7 @@ lines(t, trajectoires[, 2], col = 'limegreen')
 lines(t, trajectoires[, 3], col = 'lightblue')
 ```
 
-Ce qui est intéressant avec ce processus, c'est qu'il est déterministe. En connaissant le $A$, $B$ et $\omega$ de départ, on peut déterminer toute la trajectoire de $X_t$. Cependant, notre processus est défini pour $\omega$ fixé dans $[0, 2\pi]$ et simulé sur n = 200. Or, si je prends un $\omega$ proche de $0$ mais $\ne0$, la trajectoire de $X_t$ s'apparentera à celle d'un processus non-stationnaire.
+Ce qui est intéressant avec ce processus, c'est qu'il est déterministe. En connaissant le $A$, $B$ et $\omega$ de départ, on peut déterminer toute la trajectoire de $X_t$. Cependant, notre processus est défini pour $\omega$ fixé dans $[0, 2\pi]$ et simulé sur n = 200. Or, si on prend un $\omega$ proche de $0$ mais $\ne0$, la trajectoire de $X_t$ s'apparentera à celle d'un processus non-stationnaire.
 
 ```{r}
 set.seed(123)
@@ -196,9 +199,9 @@ Le processus est égale à lui-même et donc constant dans le temps.
 
 Le modèle peut se réécrire sous sa forme canonique comme : $(1 - 2B + B^2) X_t = \varepsilon_t$, correspondant à un AR(2).
 
-1 est racine évidente du polynôme caractéristique $r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
+1 est racine évidente du polynôme caractéristique $(1 - 2B + B^2)$.
 
-Le processus n'est donc pas stationnaire puisque les racines sont sur le cercle unité.
+Le processus n'est donc pas stationnaire puisqu'il a une racine sur le cercle unité.
 
 **4. Différenciation**
 
@@ -244,7 +247,6 @@ lines(d2, col="limegreen")
 lines(d3, col="lightblue")
 ```
 
-
 ## e) $\quad X_t - 4X_{t-1} = \varepsilon_t - 0.25\varepsilon_{t-1}$
 
 Nous pouvons réécrire le processus comme $(1 - 4B)X_t = (1 - 0.25B)\varepsilon_t$.
@@ -272,6 +274,7 @@ lines(e2, col="limegreen")
 lines(e3, col="lightblue")
 ```
 
+\newpage
 
 # Exercice 2
 
@@ -292,35 +295,37 @@ spectrum(p1)
 p1_decomp <- decompose(p1)
 plot(p1_decomp)
 ```
-On remarque que la saisonalité est très marquée et régulière, tandis que la tendance est plus compliquée à discerner, même s'il semble y avoir une tendance à la baisse.
+ - ACF : On observe une autocorrelation qui s'apparente à un sinusoïde, cela indique souvent la présence d'une racine unitaire ou d'une tendance dans la série temporelle, ce qui suggère que la série n'est pas stationnaire. \
+ - PACF : Comme le deuxième lag ne se situe pas dans la borne de confiance, on peut dire que notre processus n'est pas un bruit blanc. \
+ - Périodogramme : Il nous indique par la présence des pics que la série temporelle a une variance significative, pouvant correspondre à des cycles ou saisonnalités.
+
+- Decompose :
+  - Composante observée (en haut) : C'est la série temporelle originale qui combine les effets de la tendance, de la saisonnalité et des composantes aléatoires.
+  - Composante de tendance (deuxième graphique) : Cette ligne lisse montre comment la série évolue sur le long terme, sans tenir compte des fluctuations saisonnières. On peut voir que la tendance est relativement stable mais présente une légère baisse et hausse périodique.
+  - Composante saisonnière (troisième graphique) : Cela montre un motif clair et répétitif qui semble se reproduire chaque année. La régularité et l'amplitude des pics et des creux indiquent que la série temporelle est influencée par des facteurs saisonniers, confirmant l'hypothèse faite en a).
+  - Composante aléatoire (en bas) : Ce qui reste après avoir retiré la tendance et la saisonnalité de la série observée. Dans une série temporelle bien modélisée, cette composante devrait ressembler à un bruit blanc.
 
 ## c) $X_t = m + A \sin\left(\frac{2\pi t}{T}\right) + B \cos\left(\frac{2\pi t}{T}\right) + Y_t$
 
-   - \( X_t \) représente la valeur de la série temporelle au temps \( t \).
-   - \( m \) est la moyenne de la série.
-   - \( A \) et \( B \) sont les amplitudes des composantes sinusoïdales et cosinusoïdales, respectivement.
-   - \( T \) est la période de la composante saisonnière. Pour des données hebdomadaires sur plusieurs années, \( T \) pourrait être 52, représentant le nombre de semaines par an.
-   - \( Y_t \) est le terme d'erreur ou la composante non-périodique.
+On choisit un T de 52 correspondant aux nombre de semaines.
 
-On choisit donc un T de 52.
-
-```{r}
+```{r, warning=FALSE}
 T <- 52
 t <- 1:length(p1)
 
-sin_term <- sin(2 * pi * t / T)
-cos_term <- cos(2 * pi * t / T)
+sin_terme <- sin(2 * pi * t / T)
+cos_terme <- cos(2 * pi * t / T)
 
-reg_model <- lm(p1 ~ sin_term + cos_term)
+reg_modele <- lm(p1 ~ sin_terme + cos_terme)
 
-m <- coef(reg_model)[1]
-A <- coef(reg_model)[2]
-B <- coef(reg_model)[3]
+m <- coef(reg_modele)[1]
+A <- coef(reg_modele)[2]
+B <- coef(reg_modele)[3]
 
-Zt <- reg_model$residuals - mean(reg_model$residuals)
+Zt <- reg_modele$residuals - mean(reg_modele$residuals)
 
 adf_test <- adf.test(Zt)
-summary(reg_model)
+summary(reg_modele)
 adf_test
 ```
 
@@ -333,40 +338,43 @@ Le p.value du test de Dickey-Fuller étant inférieur au seuil de 5%, on rejette
 ```{r}
 acf(Zt)
 pacf(Zt)
+Box.test(Zt, type = "Ljung-Box")
 ```
 
-$Z_t$ n'est pas un bruit blanc puisqu'il y a des autocorrelations significatives sur l'acf comme sur le pacf, suggérant que notre modèle contiendra une partie AR et une partie MA. Sur la partie AR, le dernier retard est atteint en lag = 4 et pour la partie MA, le dernier retard est atteint en lag = 6. Nous allons ainsi tester par le moyen d'une boucle tous les modèles en faisant varier la partie AR de 0 à 4 et la partie MA de 0 à 6. Pour chaque modèle, on vérifiera les t.values associées à chaque coefficients $coef/s.e.$ en considérant que si sa valeur est inférieure à 1.96, considère la t.value comme non significative.
+$Z_t$ n'est pas un bruit blanc puisqu'il y a des autocorrelations significatives sur l'acf comme sur le pacf, suggérant que notre modèle contiendra une partie AR et une partie MA. Sur la partie AR, le dernier retard est atteint en lag = 4 et pour la partie MA, le dernier retard est atteint en lag = 6. En complément, nous effectuons un test de Ljung-Box afin de confirmer cette hypothèse. Effectivement, sa p.value supérieure à 0.05 confirme l'hypothèse que ce n'est pas un bruit blanc.
+
+Nous allons ainsi tester par le moyen d'une boucle tous les modèles en faisant varier la partie AR de 0 à 4 et la partie MA de 0 à 6. Pour chaque modèle, on vérifiera les t.values associées à chaque coefficients $coef/s.e.$ en considérant que si sa valeur est inférieure à 1.96, on considérera la t.value comme non significative.
 
 ```{r}
-orders <- expand.grid(ar = 0:4, ma = 0:6)[-1, ]
-models <- list()
+ordres <- expand.grid(ar = 0:4, ma = 0:6)[-1, ]
+modeles <- list()
 
-for (i in seq(nrow(orders))) {
-  models[[i]] <- Arima(Zt, order = c(orders[i, "ar"], 0, orders[i, "ma"]))
+for (i in seq(nrow(ordres))) {
+  modeles[[i]] <- Arima(Zt, order = c(ordres[i, "ar"], 0, ordres[i, "ma"]))
 }
 
-results <- data.frame(AR = rep(NA, nrow(orders)),
-                      MA = rep(NA, nrow(orders)),
-                      AIC = rep(NA, nrow(orders)),
+resultats <- data.frame(AR = rep(NA, nrow(ordres)),
+                      MA = rep(NA, nrow(ordres)),
+                      AIC = rep(NA, nrow(ordres)),
                       stringsAsFactors = FALSE)
-for (i in seq(nrow(orders))) {
-  model <- models[[i]]
+for (i in seq(nrow(ordres))) {
+  model <- modeles[[i]]
   coefs <- model$coef
   se_coefs <- sqrt(diag(vcov(model)))
   t.values <- abs(coefs / se_coefs)
   compteur_t.values <- sum(t.values < 1.96) - 1
 
-  results[i, "AR"] <- orders[i, "ar"]
-  results[i, "MA"] <- orders[i, "ma"]
-  results[i, "AIC"] <- AIC(model)
-  results[i, "t.value non significatives"] <- compteur_t.values
+  resultats[i, "AR"] <- ordres[i, "ar"]
+  resultats[i, "MA"] <- ordres[i, "ma"]
+  resultats[i, "AIC"] <- AIC(model)
+  resultats[i, "t.value non significatives"] <- compteur_t.values
 }
 
-kable(results, booktabs = TRUE) %>%
-  kable_styling(latex_options = c("hold_position"))
+kable(resultats, booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position"))
 ```
 
-Il y a deux modèles qui se distinguent clairement des autres : ARMA(1,3) et l'ARMA(4,1). Ils ont toutes leurs t.values significatives et ont un AIC plus faible que les autres. On gardera l'ARMA(1,3) car son AIC est un petit peu plus faible que pour l'ARMA(4,1), bien qu'on puisse considérer les deux modèles comme équivalents.
+Il y a deux modèles qui se distinguent clairement des autres : ARMA(1,3) et l'ARMA(4,1). Ils ont toutes leurs t.values significatives et ont un AIC plus faible que les autres. On gardera l'ARMA(1,3) car son AIC est un peu plus faible que celui de l'ARMA(4,1), bien qu'on puisse considérer les deux modèles comme équivalents du point de vue de ce critère.
 
 ## e) Prévision pour le mois de janvier
 
@@ -377,7 +385,7 @@ arma_xt <- Arima(Zt, order=c(1,0,3))
 Zt_forecast <- forecast(arma_xt, h=4)
 ```
 
-On doit ensuite reconstruire les prédictions pour $X_t$ en ajoutant la trend et la saisonalité.
+On doit ensuite reconstruire les prédictions pour $X_t$ en ajoutant la trend et la saisonnalité.
 
 ```{r}
 t_future <- length(p1) + 1:length(Zt_forecast$mean)
@@ -386,6 +394,15 @@ cos_term_future <- cos(2 * pi * t_future / 52)
 Xt_future <- m + A * sin_term_future + B * cos_term_future + Zt_forecast$mean
 Xt_future
 ```
+
+```{r}
+time_future <- seq(max(time(p1)), by = 1/52, length.out = 4)
+plot(p1, main = "Données originales avec prédictions", xlab = "Temps", ylab = "Valeurs", type = "l")
+points(time_future, Xt_future, col = "blue", pch = 19)
+lines(time_future, Xt_future, col = "red", lty = 2)
+legend("topleft", legend = c("Originale", "Prédictions"), col = c("black", "blue"), pch = c(NA, 19), lty = c(1, NA))
+```
+Les prédictions semblent suivre la tendance, continuant la hausse en cours au mois de décembre.
 
 ## f) SARIMA
 
@@ -401,37 +418,52 @@ january_forecast <- forecast(sarima_Xt, h=4)
 january_forecast
 ```
 
-## g) Application de l'opérateur de différenciation $(1-B^52)$
+
+## g) Application de l'opérateur de différenciation $(1-B^{52})$
 
 ```{r}
 p1_diff <- diff(p1, lag = 52)
+eacf(p1_diff)
 arma_model_diff <- auto.arima(p1_diff, seasonal = FALSE)
 summary(arma_model_diff)
 january_forecast_diff <- forecast(arma_model_diff, h=4)
 kbl(january_forecast_diff, booktabs = TRUE) %>%
   kable_styling(latex_options = c("hold_position"))
+AIC(arma_model_diff)
 ```
+Avec une différenciation de 52 sur un modèle de type ARMA, on revient au même résultat que pour $Z_t$. La méthode du coin et la fonction auto.arima considère $ARMA(1,3)$ comme le meilleur modèle.
 
 ## h) Modèle le plus pertinent
 
-## e)
+Effectuer une comparaison d'AIC est pertinent pour choisir le meilleur modèle. 
+
+```{r}
+df <- data.frame(
+  Modèle = character(0),
+  AIC = numeric(0),
+  MAE = numeric(0)
+)
+
+df <- rbind(df, data.frame(Modèle = "Modèle C", AIC = AIC(reg_modele), MAE = mean(abs(reg_modele$residuals))))
+df <- rbind(df, data.frame(Modèle = "Modèle E", AIC = arma_xt$aic, MAE = mean(abs(arma_xt$residuals))))
+df <- rbind(df, data.frame(Modèle = "Modèle F", AIC = sarima_Xt$aic, MAE = mean(abs(sarima_Xt$residuals))))
+df <- rbind(df, data.frame(Modèle = "Modèle G", AIC = AIC(arma_model_diff), MAE = mean(abs(arma_model_diff$residuals))))
+
+kable(df, booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position"))
+```
+
+On choisit donc le modèle estimé en e, c'est celui qui a l'AIC le plus faible. De plus, c'est celui qui semble faire le moins d'erreurs de prédiction obtenant un $MAE = 0.4$. Cela signifie qu'en moyenne, les prédictions du modèle e s'écartent de 0.40€ du prix réel de la série p1.
+
+## i)
 
 Forme réduite : $(1 - B^{52})(1 - 2B + B^2)(1 - 2B)X_t = (1-B) \varepsilon_t$
 
-SARIMA(2, 0, 1)(1, 1, 0)[52]
-
-```{r}
-x <- sarima(p1~0 | ma(1) + ar(2) + sar(52,1) + i(1) + sma(1))
-```
-
-
 ```{r}
 set.seed(123)
-x <- sim_sarima(n = 500, # nombre de points de données
+x <- sim_sarima(n = 500,
                 model = list(ar = c(2, -2, 1),
                              ma = 1,
-                             sar = -1,
-                             sma = 1,
                              iorder = 1, 
                              siorder = 1,
                              nseasons = 52,
@@ -457,7 +489,9 @@ pacf(ts(y))
 adf.test(y)
 
 # Série Yt
-z <- diff(y,52)
+model_z <- Arima(ts(rnorm(500), frequency = 52), order = c(0, 1, 1), seasonal = list(order = c(0, 1, 1)))
+
+z <- simulate(model_z, nsim = 500)
 
 plot(ts(z))
 
@@ -465,5 +499,65 @@ acf(ts(z))
 pacf(ts(z))
 adf.test(z)
 ```
+La série temporelle \( X_t \) n'est pas stationnaire, et cela reste vrai même après différenciation. Cependant, la série différenciée révèle une saisonnalité, comme on peut le voir dans le graphique de la fonction d'autocorrélation (ACF), où des cycles de significativité apparaissent à certains décalages (lags). En revanche, la série \( Y_t \) semble être stationnaire. Ceci est indiqué par le fait que l'autocorrélation de ses décalages, observée à la fois dans l'ACF et dans la fonction d'autocorrélation partielle (PACF), est très faible. De plus, le test de Dickey-Fuller vient confirmer cette hypothèse en rejetant $H0$ qui suppose que \( Y_t \) est non-stationnaire.
 
-On remarque que qu'il y a toujours une saisonalité sur Yt, mais qu'elle est plus dans un ordre 5 ou.
+## j) k)
+
+```{r}
+eacf(z)
+modele_ar <- Arima(z, order = c(0, 0, 0))
+modele_ma <- Arima(z, order = c(0, 0, 0))
+modele_arma <- Arima(z, order = c(0, 0, 0))
+
+forecast_1 <- forecast(modele_arma, h = 1)
+forecast_2 <- forecast(modele_arma, h = 2)
+
+print(forecast_1)
+print(forecast_2)
+```
+
+On choisit le modèle AR(0), MA(0) et donc ARMA(0,0). On en conclut que c'est un bruit blanc. Notre hypothèse est que 
+Concernant la question j), nous avons déterminé que le modèle est AR(0) et MA(0), alors les formes $AR(\infty)$ et $MA(\infty)$ sont simplement le terme constant, car il n'y a pas de termes dépendant des valeurs passées ou des erreurs passées.
+
+## l)
+
+```{r}
+diff_ordre <- 1
+diff_order_saison <- 1
+periode <- 52
+Y_t <- diff(diff(x, differences = diff_ordre), 
+            differences = diff_order_saison, 
+            lag = periode)
+
+model_Y <- Arima(Y_t, order = c(1, 0, 0))
+
+phi <- model_Y$coef[1]
+
+n_simulations <- 999
+n <- 500
+
+forecasts_501 <- numeric(n_simulations)
+forecasts_502 <- numeric(n_simulations)
+
+for (i in 1:n_simulations) {
+    series <- arima.sim(model = list(ar = c(phi)), n = n)
+    fit <- Arima(series, order = c(1,0,0))
+    forecast <- forecast(fit, h = 2)
+    
+    forecasts_501[i] <- forecast$mean[1]
+    forecasts_502[i] <- forecast$mean[2]
+}
+
+mean_501 <- mean(forecasts_501)
+mean_502 <- mean(forecasts_502)
+sd_501 <- sd(forecasts_501)
+sd_502 <- sd(forecasts_502)
+
+hist(forecasts_501, main = "Distribution des Prévisions pour Y_501", xlab = "Y_501")
+hist(forecasts_502, main = "Distribution des Prévisions pour Y_502", xlab = "Y_502")
+
+print(paste("Moyenne des prévisions pour Y_501:", mean_501, "et écart-type:", sd_501))
+print(paste("Moyenne des prévisions pour Y_502:", mean_502, "et écart-type:", sd_502))
+```
+
+Les distributions des deux prévisions sont normales et centrées à zéro, notre modèle AR(1) prédit donc en moyenne une valeur proche de 0 pour les pas futurs. Les valeurs des écarts-types montrent que les prévisions se situent relativement proche de la moyenne. De plus, ces écarts types sont assez faibles, justifiant que les prédictions sont assez précises.
