@@ -2,7 +2,7 @@
 title: "Projet de Séries temporelles, M1 IES-D3S"
 output: pdf_document
 date: "2024-01-16"
-author: "Thomas Fernandes, Vanessa Kenniche, Yassine Ouerghi"
+author: "Vanessa Kenniche, Thomas Fernandes, Yassine Ouerghi"
 ---
 
 ```{r setup, include=FALSE}
@@ -411,7 +411,7 @@ sarima_Xt <- auto.arima(p1)
 summary(sarima_Xt)
 ```
 
-La fonction `auto.arima()` choisi le modèle $SARIMA_{52}[(0,0,3)(2,1,0)]$. Ainsi, il choisi 3 composantes MA pour la partie non saisonnière et 2 composantes AR ainsi qu'une différenciation pour la partie saisonnière.
+La fonction `auto.arima()` choisit le modèle $SARIMA_{52}[(0,0,3)(2,1,0)]$. Ainsi, elle choisit 3 composantes MA pour la partie non saisonnière et 2 composantes AR ainsi qu'une différenciation pour la partie saisonnière.
 
 ```{r}
 january_forecast <- forecast(sarima_Xt, h=4)
@@ -516,7 +516,7 @@ print(forecast_1)
 print(forecast_2)
 ```
 
-On choisit le modèle AR(0), MA(0) et donc ARMA(0,0). On en conclut que c'est un bruit blanc. Notre hypothèse est que 
+On choisit le modèle AR(0), MA(0) et donc ARMA(0,0). On en conclut que c'est un bruit blanc.
 Concernant la question j), nous avons déterminé que le modèle est AR(0) et MA(0), alors les formes $AR(\infty)$ et $MA(\infty)$ sont simplement le terme constant, car il n'y a pas de termes dépendant des valeurs passées ou des erreurs passées.
 
 ## l)
