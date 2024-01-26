@@ -48,4 +48,7 @@ Y_t = (1 - B)(1 - B^2)X_t, \quad t = 1, \ldots, n
 
 (dans sa forme canonique). Que constatez-vous ? $X_t$ est-elle stationnaire ? $Y_t$ ?
 
+j) donner les formes \( AR(\infty) \) et \( MA(\infty) \) du processus \( Y_t \).
+
+
 https://chat.openai.com/g/g-0S5FXLyFN-wolfram/c/f1f4d172-8584-4ca9-a773-3f57215ac31c

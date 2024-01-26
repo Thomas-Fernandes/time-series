@@ -20,7 +20,6 @@ library(knitr)
 ## a) $X_t = \sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}$
 
 **1. Espérance**
-
 \begin{align*}
 \mathbb{E}[X_t] &= \mathbb{E}[\sin(t)] + \mathbb{E}[\varepsilon_t] - 0.2\mathbb{E}[\varepsilon_{t-1}] \\
 \mathbb{E}[X_t] &= \mathbb{E}[\sin(t)] + 0 - 0.2 \times 0 \\
@@ -34,7 +33,6 @@ Par conséquent, l'espérance de $X_t$ n'est pas constante car elle dépend de t
 \[ \gamma_X(h) = \text{Cov}(\sin(t) + \varepsilon_t - 0.2 \times \varepsilon_{t-1}, \sin(t+h) + \varepsilon_{t+h} - 0.2 \times \varepsilon_{t+h-1}) \]
 
 La covariance des sinus s'annule donc :
-
 \begin{align*}
 \gamma_X(0)   &= \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) \\
 \gamma_X(1)   &= \text{Cov}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}, \varepsilon_{t+1} - 0.2 \times \varepsilon_t) \\
@@ -42,7 +40,7 @@ La covariance des sinus s'annule donc :
 \end{align*}
 
 
-- \( h = 0 \) : \( \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) = \sigma^2 + 0.04\sigma^2 = 1.04\sigma^2 \) (car \( \sigma^2 = 1 \) dans les simulations).
+- \( h = 0 \) : \( \gamma_X(0) = \text{Var}(\varepsilon_t - 0.2 \times \varepsilon_{t-1}) = \sigma^2 + 0.04\sigma^2 = 1.04 \)
 - \( h = 1 \) ou \( h = -1 \) : \( \gamma_X(1) = \gamma_X(-1) = -0.2\sigma^2 \).
 
 Le processus n'est ainsi pas stationnaire puisque son espérance n'est pas constante.
@@ -70,7 +68,6 @@ lines(a3, col="lightblue")
 ## b) $\, X_t = \varepsilon_t - \varepsilon_{t-1}$
 
 **1. Espérance**
-
 \[
 E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon_{t-1}) = 0 - 0 = 0
 \]
@@ -85,7 +82,6 @@ E(X_t) = E(\varepsilon_t - \varepsilon_{t-1}) = E(\varepsilon_t) - E(\varepsilon
 &= \sigma^2 + \sigma^2 \\
 &= 2
 \end{align*}
-
 - Pour \( h = 1 \) :
 \begin{align*}
 \gamma_X(1) &= \text{Cov}(X_t, X_{t+1}) \\
@@ -102,16 +98,15 @@ D'après la définition du bruit blanc, $\text{Cov}(\varepsilon_t, \varepsilon_s
 
 Le processus \( X_t = \varepsilon_t - \varepsilon_{t-1} \) est stationnaire au second ordre car son espérance est constante et sa fonction d'autocovariance ne dépend que de \( h \) et non de \( t \).
 
-
 **3. Forme canonique**
 
 Le processus, sous sa forme canonique, s'écrit comme : $X_t = (1 - B)\varepsilon_t$ correspondant à un un MA(1).
 
 ```{r}
 set.seed(123)
-b1 <- arima.sim(model = list(ma = -1), n = 200)
-b2 <- arima.sim(model = list(ma = -1), n = 200)
-b3 <- arima.sim(model = list(ma = -1), n = 200)
+b1 <- arima.sim(model = list(ma = 1), n = 200)
+b2 <- arima.sim(model = list(ma = 1), n = 200)
+b3 <- arima.sim(model = list(ma = 1), n = 200)
 
 plot(b1, type="l", col="black", main="Trajectoires MA(1)", xlab = "Temps", ylab = "Valeurs")
 lines(b2, col="limegreen")
@@ -121,9 +116,10 @@ lines(b3, col="lightblue")
 ## c) $X_t = A\cos(\omega t) + B\sin(\omega t)$
 
 **1. Espérance**
-
-$E[X_t] = E[A]\cos(\omega t) + E[B]\sin(\omega t)$
-$E[X_t] = E[A] \times E[\cos(\omega t)] + E[B] \times E[\sin(\omega t)] = 0$
+\begin{align*}
+E[X_t] &= E[A]\cos(\omega t) + E[B]\sin(\omega t) \\
+E[X_t] &= E[A] \times E[\cos(\omega t)] + E[B] \times E[\sin(\omega t)] = 0
+\end{align*}
 
 **2. Autocovariance**
 \begin{align*}
@@ -131,29 +127,23 @@ $E[X_t] = E[A] \times E[\cos(\omega t)] + E[B] \times E[\sin(\omega t)] = 0$
 &= E\left[A^2\cos(\omega s)\cos(\omega t) + AB\cos(\omega s)\sin(\omega t) + AB\sin(\omega s)\cos(\omega t) + B^2\sin(\omega s)\sin(\omega t)\right]
 \end{align*}
 
-
 Étant donné que $A$ et $B$ sont indépendantes, on peut simplifier cette expression en utilisant \( E[A^2] \), \( E[B^2] \) et le fait que \( E[AB] = E[A]E[B] = 0 \) :
 
 \[ \gamma(s, t) = E[A^2]\cos(\omega s)\cos(\omega t) + E[B^2]\sin(\omega s)\sin(\omega t) \]
 
 Puisque \( A \) et \( B \) ont une variance finie on peut les remplacer par leurs variances :
-
-\[ \gamma(s, t) = \sigma_A^2\cos(\omega s)\cos(\omega t) + \sigma_B^2\sin(\omega s)\sin(\omega t) \]
-
-\[
-\gamma(s, t) = \sigma_A^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) + \cos(\omega s + \omega t)] + \sigma_B^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) - \cos(\omega s + \omega t)]
-\]
-
-\[
-\gamma(s, t) = \frac{1}{2}(\sigma_A^2 + \sigma_B^2) \cos(\omega(t - s))
-\]
+\begin{align*}
+\gamma(s, t) &= \sigma_A^2\cos(\omega s)\cos(\omega t) + \sigma_B^2\sin(\omega s)\sin(\omega t) \\
+&= \sigma_A^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) + \cos(\omega s + \omega t)] + \sigma_B^2 \cdot \frac{1}{2}[\cos(\omega s - \omega t) - \cos(\omega s + \omega t)] \\
+&= \frac{1}{2}(\sigma_A^2 + \sigma_B^2) \cos(\omega(t - s))
+\end{align*}
 
 Le processus \( X_t = A\cos(\omega t) + B\sin(\omega t) \) est stationnaire au second ordre, car son espérance est constante et sa fonction d'autocovariance dépend uniquement de la différence entre les temps \( s \) et \( t \).
 
 ```{r}
 set.seed(123)
 n <- 200
-omega <- pi/30
+omega <- pi/40
 A <- rnorm(n)
 B <- rnorm(n)
 
@@ -165,7 +155,29 @@ for (i in 1:3) {
 }
 
 plot(t, trajectoires[, 1], type = 'l', col = 'black', ylim = range(trajectoires),
-     xlab = 'Time', ylab = 'X_t', main = 'Trajectoires')
+     xlab = 'Temps', ylab = 'X_t', main = 'Trajectoires pour omega = pi/40')
+lines(t, trajectoires[, 2], col = 'limegreen')
+lines(t, trajectoires[, 3], col = 'lightblue')
+```
+
+Ce qui est intéressant avec ce processus, c'est qu'il est déterministe. En connaissant le $A$, $B$ et $\omega$ de départ, on peut déterminer toute la trajectoire de $X_t$. Cependant, notre processus est défini pour $\omega$ fixé dans $[0, 2\pi]$ et simulé sur n = 200. Or, si je prends un $\omega$ proche de $0$ mais $\ne0$, la trajectoire de $X_t$ s'apparentera à celle d'un processus non-stationnaire.
+
+```{r}
+set.seed(123)
+n <- 200
+omega <- pi/2000
+A <- rnorm(n)
+B <- rnorm(n)
+
+t <- 1:n
+trajectoires <- matrix(0, nrow = n, ncol = 3)
+
+for (i in 1:3) {
+  trajectoires[, i] <- A[i] * cos(omega * t) + B[i] * sin(omega * t)
+}
+
+plot(t, trajectoires[, 1], type = 'l', col = 'black', ylim = range(trajectoires),
+     xlab = 'Temps', ylab = 'X_t', main = 'Trajectoires pour omega = pi/2000')
 lines(t, trajectoires[, 2], col = 'limegreen')
 lines(t, trajectoires[, 3], col = 'lightblue')
 ```
@@ -184,17 +196,7 @@ Le processus est égale à lui-même et donc constant dans le temps.
 
 Le modèle peut se réécrire sous sa forme canonique comme : $(1 - 2B + B^2) X_t = \varepsilon_t$, correspondant à un AR(2).
 
-On cherche les racines du polynôme caractéristique $1-2r+r^2=0$ :
-
-\[ r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
-
-Dans notre cas, \( a = 1 \), \( b = -2 \) et \( c = 1 \). Les racines seront donc :
-
-\[ r = \frac{-(-2) \pm \sqrt{(-2)^2 - 4 \cdot 1 \cdot 1}}{2 \cdot 1} \]
-\[ r = \frac{2 \pm \sqrt{4 - 4}}{2} \]
-\[ r = \frac{2 \pm \sqrt{0}}{2} \]
-\[ r = \frac{2}{2} \]
-\[ r = 1 \]
+1 est racine évidente du polynôme caractéristique $r = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
 
 Le processus n'est donc pas stationnaire puisque les racines sont sur le cercle unité.
 
@@ -202,12 +204,15 @@ Le processus n'est donc pas stationnaire puisque les racines sont sur le cercle 
 
 Pour le rendre stationnaire, on va différencier le processus à l'ordre 2.
 
-\[ \Delta X_t = (2X_{t-1} - X_{t-2} + \varepsilon_t) - X_{t-1} \]
-\[ \Delta X_t = X_{t-1} - X_{t-2} + \varepsilon_t \]
+\begin{align*}
+\Delta X_t &= (2X_{t-1} - X_{t-2} + \varepsilon_t) - X_{t-1} \\
+\Delta X_t &= X_{t-1} - X_{t-2} + \varepsilon_t \\
+\\
+\Delta^2 X_t &= \Delta X_t - \Delta X_{t-1} \\
+\Delta^2 X_t &= (X_{t-1} - X_{t-2} + \varepsilon_t) - (X_{t-2} - X_{t-3} + \varepsilon_{t-1}) \\
+\Delta^2 X_t &= X_{t-1} - 2X_{t-2} + X_{t-3} + \varepsilon_t - \varepsilon_{t-1}
+\end{align*}
 
-\[ \Delta^2 X_t = \Delta X_t - \Delta X_{t-1} \]
-\[ \Delta^2 X_t = (X_{t-1} - X_{t-2} + \varepsilon_t) - (X_{t-2} - X_{t-3} + \varepsilon_{t-1}) \]
-\[ \Delta^2 X_t = X_{t-1} - 2X_{t-2} + X_{t-3} + \varepsilon_t - \varepsilon_{t-1} \]
 
 Le processus correspond donc à un ARIMA(2,2,0).
 
@@ -245,17 +250,16 @@ lines(d3, col="lightblue")
 Nous pouvons réécrire le processus comme $(1 - 4B)X_t = (1 - 0.25B)\varepsilon_t$.
 
 Solution de l'équation caractéristique pour la partie AR :
-
-$1-4r=0$
-$r=0.25$
-
+\begin{align*}
+1 - 4r &= 0 \\
+r &= 0.25
+\end{align*}
 Solution de l'équation caractéristique pour la partie MA :
-
-$1-0.25r=0$
-$r=4$
-
+\begin{align*}
+1 - 0.25r &= 0 \\
+r &= 4
+\end{align*}
 La racine est l’extérieur du cercle unité, on inverse et on trouve $r=0.25$. Notre processus est donc un ARMA(0.25, 0.25).
-
 
 ```{r}
 set.seed(123)
@@ -409,3 +413,57 @@ kbl(january_forecast_diff, booktabs = TRUE) %>%
 ```
 
 ## h) Modèle le plus pertinent
+
+## e)
+
+Forme réduite : $(1 - B^{52})(1 - 2B + B^2)(1 - 2B)X_t = (1-B) \varepsilon_t$
+
+SARIMA(2, 0, 1)(1, 1, 0)[52]
+
+```{r}
+x <- sarima(p1~0 | ma(1) + ar(2) + sar(52,1) + i(1) + sma(1))
+```
+
+
+```{r}
+set.seed(123)
+x <- sim_sarima(n = 500, # nombre de points de données
+                model = list(ar = c(2, -2, 1),
+                             ma = 1,
+                             sar = -1,
+                             sma = 1,
+                             iorder = 1, 
+                             siorder = 1,
+                             nseasons = 52,
+                             sigma2 = 1))
+
+
+plot(ts(x))
+
+# Test de périodicité et stationnarité de Xt
+acf(ts(x))
+pacf(ts(x))
+adf.test(x)
+
+
+# Série différenciée de Xt, Xt - Xt-1
+y <- diff(x,1)
+
+plot(ts(y))
+
+# Test de périodicité et stationnarité de Xt - Xt-1
+acf(ts(y))
+pacf(ts(y))
+adf.test(y)
+
+# Série Yt
+z <- diff(y,52)
+
+plot(ts(z))
+
+acf(ts(z))
+pacf(ts(z))
+adf.test(z)
+```
+
+On remarque que qu'il y a toujours une saisonalité sur Yt, mais qu'elle est plus dans un ordre 5 ou.
